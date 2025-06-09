@@ -1,5 +1,6 @@
 package app.graphics;
 
+import app.graphics.util.Interval;
 import app.graphics.util.Vec3;
 
 public class Sphere implements Hittable {
@@ -12,12 +13,9 @@ public class Sphere implements Hittable {
     }
 
     @Override
-    public boolean hitRay(Ray ray, float tMin, float tMax, HitPoint hitPoint) {
+    public boolean hitRay(Ray ray, Interval rayT, HitPoint hitPoint) {
         if (hitPoint == null) {
             throw new RuntimeException("hitRay() method argument \"hitPoint\" cannot be a null reference.");
-        }
-        if (tMax < 0.0f) {
-            tMax = Float.MAX_VALUE;
         }
 
         Vec3 oc = center.sub(ray.getOrigin());
@@ -31,9 +29,9 @@ public class Sphere implements Hittable {
 
         delta = (float)Math.sqrt(delta);
         float root = (h - delta) / a;
-        if (root <= tMin || root >= tMax) {
+        if (!rayT.surrounds(root)) {
             root = (h + delta) / a;
-            if (root <= tMin || root >= tMax) {
+            if (!rayT.surrounds(root)) {
                 return false;
             }
         }

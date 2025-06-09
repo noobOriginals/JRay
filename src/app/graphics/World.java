@@ -2,6 +2,8 @@ package app.graphics;
 
 import java.util.ArrayList;
 
+import app.graphics.util.Interval;
+
 public class World {
     private ArrayList<Hittable> objects;
     public World() {
@@ -30,12 +32,9 @@ public class World {
         objects.clear();
     }
 
-    public boolean raycast(Ray ray, float tMin, float tMax, HitPoint hitPoint) {
+    public boolean raycast(Ray ray, Interval rayT, HitPoint hitPoint) {
         if (hitPoint == null) {
             throw new RuntimeException("hitRay() method argument \"hitPoint\" cannot be a null reference.");
-        }
-        if (tMax < 0.0f) {
-            tMax = Float.MAX_VALUE;
         }
         if (objects.isEmpty()) {
             return false;
@@ -43,10 +42,10 @@ public class World {
 
         HitPoint tempHit = new HitPoint();
         boolean hit = false;
-        float closestT = tMax;
+        float closestT = rayT.getMax();
 
         for (Hittable object : objects) {
-            if (object.hitRay(ray, tMin, closestT, tempHit)) {
+            if (object.hitRay(ray, new Interval(rayT.getMin(), closestT), tempHit)) {
                 hit = true;
                 closestT = tempHit.t;
                 copyHitPoint(tempHit, hitPoint);

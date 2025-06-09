@@ -1,6 +1,7 @@
 package app.graphics;
 
 import app.graphics.util.Image;
+import app.graphics.util.Interval;
 import app.graphics.util.Pixel;
 import app.graphics.util.Vec3;
 
@@ -30,16 +31,18 @@ public class Render {
         image.save(filename);
     }
 
-    public static Pixel raycast(Ray r, World world) {
+    public static Pixel raycast(Ray ray, World world) {
         HitPoint hitPoint = new HitPoint();
-        if (world.raycast(r, 0.0f, -1.0f, hitPoint)) {
-            // Vec3 normal = r.at(hitPoint.t).sub(s.getCenter()).normalize();
+        if (world.raycast(ray, new Interval(0.0f, Float.POSITIVE_INFINITY), hitPoint)) {
             Vec3 normal = hitPoint.normal.normalize();
             Vec3 color = add(new Vec3(1.0f, 1.0f, 1.0f), normal).mul(0.5f);
             return new Pixel(color);
         }
         else {
-            return new Pixel(10, 10, 10);
+            Vec3 dir = ray.getDir().normalize();
+            float a = dir.y * 0.5f + 0.5f;
+            Vec3 col = new Vec3(1.0f, 1.0f, 1.0f).mul(1.0f - a).add(new Vec3(0.5f, 0.7f, 1.0f).mul(a));
+            return new Pixel(col);
         }
     }
 
