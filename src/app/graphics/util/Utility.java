@@ -47,4 +47,10 @@ public class Utility {
     public static float randomFloat(float min, float max) {
         return min + (float)Math.random() * (max - min);
     }
+    public static Vec3 randomVec3() {
+        return new Vec3(randomFloat(), randomFloat(), randomFloat());
+    }
+    public static Vec3 randomVec3(float min, float max) {
+        return new Vec3(randomFloat(min, max), randomFloat(min, max), randomFloat(min, max));
+    }
 }
