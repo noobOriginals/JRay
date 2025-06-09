@@ -6,23 +6,33 @@ import app.graphics.util.Pixel;
 import app.graphics.util.Vec3;
 
 import static app.graphics.util.VecMath.*;
+import static app.graphics.util.Utility.*;
 
 public class Render {
     private Camera camera;
     private Image image;
+    private int samplesPerPixel;
+    private float pixelSamplesScale;
 
-    public Render(int width, int height, float focalLength, float viewPortWidth) {
+    public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel) {
         float aspectRatio = (float)width / height;
         camera = new Camera(new Vec3(0.0f, 0.0f, 0.0f), aspectRatio, focalLength, viewPortWidth, width);
         image = new Image(width, height);
+        this.samplesPerPixel = samplesPerPixel;
+        pixelSamplesScale = 1.0f / samplesPerPixel;
     }
 
     public void render(World world) {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
-                Vec3 pixelPos = camera.getPixelPos(x, y);
-                Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
-                image.set(x, y, raycast(ray, world));
+                Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
+                for (int s = 0; s < samplesPerPixel; s++) {
+                    Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
+                    Vec3 pixelPos = camera.getPixelPos(x, y).add(offset.mul(new Vec3(camera.getPixelDeltaX().x, camera.getPixelDeltaY().y, 0.0f)));
+                    Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
+                    color = add(color, raycast(ray, world));
+                }
+                image.set(x, y, new Pixel(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f)));
             }
         }
     }
@@ -31,19 +41,19 @@ public class Render {
         image.save(filename);
     }
 
-    public static Pixel raycast(Ray ray, World world) {
+    public static Vec3 raycast(Ray ray, World world) {
         HitPoint hitPoint = new HitPoint();
+        Vec3 color;
         if (world.raycast(ray, new Interval(0.0f, Float.POSITIVE_INFINITY), hitPoint)) {
             Vec3 normal = hitPoint.normal.normalize();
-            Vec3 color = add(new Vec3(1.0f, 1.0f, 1.0f), normal).mul(0.5f);
-            return new Pixel(color);
+            color = add(new Vec3(1.0f, 1.0f, 1.0f), normal).mul(0.5f);
         }
         else {
             Vec3 dir = ray.getDir().normalize();
             float a = dir.y * 0.5f + 0.5f;
-            Vec3 col = new Vec3(1.0f, 1.0f, 1.0f).mul(1.0f - a).add(new Vec3(0.5f, 0.7f, 1.0f).mul(a));
-            return new Pixel(col);
+            color = new Vec3(1.0f, 1.0f, 1.0f).mul(1.0f - a).add(new Vec3(0.5f, 0.7f, 1.0f).mul(a));
         }
+        return color;
     }
 
     public Camera getCamera() {
