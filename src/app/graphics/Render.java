@@ -16,12 +16,12 @@ public class Render {
         image = new Image(width, height);
     }
 
-    public void run() {
+    public void render(World world) {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 Vec3 pixelPos = camera.getPixelPos(x, y);
                 Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
-                image.set(x, y, raycast(ray));
+                image.set(x, y, raycast(ray, world));
             }
         }
     }
@@ -30,16 +30,29 @@ public class Render {
         image.save(filename);
     }
 
-    public static Pixel raycast(Ray r) {
-        Sphere s = new Sphere(new Vec3(0.0f, 0.0f, -1.0f), 0.5f);
+    public static Pixel raycast(Ray r, World world) {
         HitPoint hitPoint = new HitPoint();
-        if (s.hitRay(r, 0.0f, -1.0f, hitPoint)) {
+        if (world.raycast(r, 0.0f, -1.0f, hitPoint)) {
             // Vec3 normal = r.at(hitPoint.t).sub(s.getCenter()).normalize();
             Vec3 normal = hitPoint.normal.normalize();
             Vec3 color = add(new Vec3(1.0f, 1.0f, 1.0f), normal).mul(0.5f);
             return new Pixel(color);
-        } else {
+        }
+        else {
             return new Pixel(10, 10, 10);
         }
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+    public Image getImage() {
+        return image;
+    }
+    public int getWidth() {
+        return image.getWidth();
+    }
+    public int getHeight() {
+        return image.getHeight();
     }
 }

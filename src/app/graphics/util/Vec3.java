@@ -60,7 +60,8 @@ public class Vec3 {
         float nx, ny, nz;
         if (len == 0) {
             nx = ny = nz = 0.0f;
-        } else {
+        }
+        else {
             nx = x / len;
             ny = y / len;
             nz = z / len;

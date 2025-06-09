@@ -13,6 +13,9 @@ public class Sphere implements Hittable {
 
     @Override
     public boolean hitRay(Ray ray, float tMin, float tMax, HitPoint hitPoint) {
+        if (hitPoint == null) {
+            throw new RuntimeException("hitRay() method argument \"hitPoint\" cannot be a null reference.");
+        }
         if (tMax < 0.0f) {
             tMax = Float.MAX_VALUE;
         }

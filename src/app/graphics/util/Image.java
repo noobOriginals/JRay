@@ -51,7 +51,8 @@ public class Image {
                 stream.write(pixels[i].r());
             }
             stream.close();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
