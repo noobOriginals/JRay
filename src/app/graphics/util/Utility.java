@@ -65,4 +65,7 @@ public class Utility {
     public static Vec3 randomUnitVec3() {
         return new Vec3(randomGaussian(), randomGaussian(), randomGaussian()).normalize();
     }
+    public static Vec3 gammaCorrect(Vec3 color) {
+        return new Vec3((float)Math.sqrt(color.x), (float)Math.sqrt(color.y), (float)Math.sqrt(color.z));
+    }
 }

@@ -27,14 +27,27 @@ public class Render {
     public void render(World world) {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
+                float ref = 0.1f;
+                if (x > image.getWidth() / 5) {
+                    ref = 0.3f;
+                }
+                if (x > (image.getWidth() * 2) / 5) {
+                    ref = 0.5f;
+                }
+                if (x > (image.getWidth() * 3) / 5) {
+                    ref = 0.7f;
+                }
+                if (x > (image.getWidth() * 4) / 5) {
+                    ref = 0.9f;
+                }
                 Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
                 for (int s = 0; s < samplesPerPixel; s++) {
                     Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
                     Vec3 pixelPos = camera.getPixelPos(x, y).add(offset.mul(new Vec3(camera.getPixelDeltaX().x, camera.getPixelDeltaY().y, 0.0f)));
                     Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
-                    color = add(color, raycast(ray, maxDepth, world));
+                    color = add(color, raycast(ray, maxDepth, world, ref));
                 }
-                image.set(x, y, new Pixel(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f)));
+                image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
             }
         }
     }
@@ -43,7 +56,7 @@ public class Render {
         image.save(filename);
     }
 
-    public static Vec3 raycast(Ray ray, int depth, World world) {
+    public static Vec3 raycast(Ray ray, int depth, World world, float ref) {
         if (depth <= 0) {
             return new Vec3(0.0f);
         }
@@ -54,7 +67,7 @@ public class Render {
             if (random.dot(hitPoint.getNormal()) < 0.0f) {
                 random = random.neg();
             }
-            return raycast(new Ray(hitPoint.getPoint(), random), depth - 1, world).mul(0.3f);
+            return raycast(new Ray(hitPoint.getPoint(), random), depth - 1, world, ref).mul(ref);
         }
         else {
             Vec3 dir = ray.getDir().normalize();
