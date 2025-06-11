@@ -1,6 +1,9 @@
 package app.graphics.util;
 
+import java.util.Random;
+
 public class Utility {
+    private static Random random = new Random();
     public static float degreesToRadians(float degrees) {
         return degrees * (float)Math.PI / 180.0f;
     }
@@ -47,10 +50,19 @@ public class Utility {
     public static float randomFloat(float min, float max) {
         return min + (float)Math.random() * (max - min);
     }
+    public static float randomGaussian() {
+        return (float)random.nextGaussian();
+    }
+    public static float randomGaussian(float mean, float stddev) {
+        return (float)(mean + stddev * random.nextGaussian());
+    }
     public static Vec3 randomVec3() {
         return new Vec3(randomFloat(), randomFloat(), randomFloat());
     }
     public static Vec3 randomVec3(float min, float max) {
         return new Vec3(randomFloat(min, max), randomFloat(min, max), randomFloat(min, max));
+    }
+    public static Vec3 randomUnitVec3() {
+        return new Vec3(randomGaussian(), randomGaussian(), randomGaussian()).normalize();
     }
 }

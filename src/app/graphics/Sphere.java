@@ -38,7 +38,7 @@ public class Sphere implements Hittable {
 
         hitPoint.t = root;
         hitPoint.point = ray.at(hitPoint.t);
-        Vec3 normal = hitPoint.point.sub(center).div(radius);
+        Vec3 normal = hitPoint.getPoint().sub(center).normalize();
         hitPoint.setFaceNormal(ray, normal);
 
         return true;

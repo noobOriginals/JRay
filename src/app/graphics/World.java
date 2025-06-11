@@ -69,9 +69,9 @@ public class World {
     }
 
     private void copyHitPoint(HitPoint src, HitPoint dest) {
-        dest.t = src.t;
-        dest.point = src.point;
-        dest.normal = src.normal;
-        dest.frontFace = src.frontFace;
+        dest.t = src.getT();
+        dest.point = src.getPoint();
+        dest.normal = src.getNormal();
+        dest.frontFace = src.getFrontFace();
     }
 }

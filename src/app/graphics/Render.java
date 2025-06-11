@@ -13,12 +13,14 @@ public class Render {
     private Image image;
     private int samplesPerPixel;
     private float pixelSamplesScale;
+    private int maxDepth; // Maximum recursion depth for ray tracing
 
-    public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel) {
+    public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth) {
         float aspectRatio = (float)width / height;
         camera = new Camera(new Vec3(0.0f, 0.0f, 0.0f), aspectRatio, focalLength, viewPortWidth, width);
         image = new Image(width, height);
         this.samplesPerPixel = samplesPerPixel;
+        this.maxDepth = maxDepth;
         pixelSamplesScale = 1.0f / samplesPerPixel;
     }
 
@@ -30,7 +32,7 @@ public class Render {
                     Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
                     Vec3 pixelPos = camera.getPixelPos(x, y).add(offset.mul(new Vec3(camera.getPixelDeltaX().x, camera.getPixelDeltaY().y, 0.0f)));
                     Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
-                    color = add(color, raycast(ray, world));
+                    color = add(color, raycast(ray, maxDepth, world));
                 }
                 image.set(x, y, new Pixel(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f)));
             }
@@ -41,12 +43,18 @@ public class Render {
         image.save(filename);
     }
 
-    public static Vec3 raycast(Ray ray, World world) {
+    public static Vec3 raycast(Ray ray, int depth, World world) {
+        if (depth <= 0) {
+            return new Vec3(0.0f);
+        }
         HitPoint hitPoint = new HitPoint();
         Vec3 color;
-        if (world.raycast(ray, new Interval(0.0f, Float.POSITIVE_INFINITY), hitPoint)) {
-            Vec3 normal = hitPoint.normal.normalize();
-            color = add(new Vec3(1.0f, 1.0f, 1.0f), normal).mul(0.5f);
+        if (world.raycast(ray, new Interval(0.001f, Float.POSITIVE_INFINITY), hitPoint)) {
+            Vec3 random = randomUnitVec3();
+            if (random.dot(hitPoint.getNormal()) < 0.0f) {
+                random = random.neg();
+            }
+            return raycast(new Ray(hitPoint.getPoint(), random), depth - 1, world).mul(0.3f);
         }
         else {
             Vec3 dir = ray.getDir().normalize();
