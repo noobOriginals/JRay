@@ -47,8 +47,8 @@ public class World {
         for (Hittable object : objects) {
             if (object.hitRay(ray, new Interval(rayT.getMin(), closestT), tempHit)) {
                 hit = true;
-                closestT = tempHit.t;
-                copyHitPoint(tempHit, hitPoint);
+                closestT = tempHit.getT();
+                hitPoint.copy(tempHit);
             }
         }
 
@@ -66,12 +66,5 @@ public class World {
     }
     public ArrayList<Hittable> getObjects() {
         return objects;
-    }
-
-    private void copyHitPoint(HitPoint src, HitPoint dest) {
-        dest.t = src.getT();
-        dest.point = src.getPoint();
-        dest.normal = src.getNormal();
-        dest.frontFace = src.getFrontFace();
     }
 }

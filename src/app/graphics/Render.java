@@ -25,6 +25,8 @@ public class Render {
     }
 
     public void render(World world) {
+        System.out.println("Starting render...");
+        long startTime = System.nanoTime();
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
@@ -35,8 +37,12 @@ public class Render {
                     color = add(color, raycast(ray, maxDepth, world));
                 }
                 image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
+                int p = (int)((float)(y * image.getWidth() + x) / image.getSize() * 100.0f);
+                long elapsedTime = System.nanoTime() - startTime;
+                System.out.print("Rendering scanline: " + y + ", pixel: " + (y * image.getWidth() + x) + ", progress: " + p + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
             }
         }
+        System.out.println("Rendered " + image.getSize() + " pixels in: " + (System.nanoTime() - startTime) / 1000000000.0f + " seconds.                                                                                       ");
     }
 
     public void save(String filename) {
@@ -50,8 +56,13 @@ public class Render {
         HitPoint hitPoint = new HitPoint();
         Vec3 color;
         if (world.raycast(ray, new Interval(0.001f, Float.POSITIVE_INFINITY), hitPoint)) {
-            Vec3 direction = randomUnitVec3().add(hitPoint.getNormal());
-            return raycast(new Ray(hitPoint.getPoint(), direction), depth - 1, world).mul(0.5f);
+            Ray scatteredRay = new Ray();
+            Vec3 attenuation = new Vec3();
+            if (hitPoint.getMaterial().scatter(ray, hitPoint, attenuation, scatteredRay)) {
+                return raycast(scatteredRay, depth - 1, world).mul(attenuation);
+            } else {
+                color = new Vec3(0.0f);
+            }
         }
         else {
             Vec3 dir = ray.getDir().normalize();

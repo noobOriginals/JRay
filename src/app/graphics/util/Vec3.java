@@ -68,6 +68,14 @@ public class Vec3 {
         }
         return new Vec3(nx, ny, nz);
     }
+    public void copy(Vec3 other) {
+        if (other == null) {
+            throw new RuntimeException("copy() method argument \"other\" cannot be a null reference.");
+        }
+        this.x = other.x;
+        this.y = other.y;
+        this.z = other.z;
+    }
     @Override
     public String toString() {
         return String.format("%f\n%f\n%f", x, y, z);

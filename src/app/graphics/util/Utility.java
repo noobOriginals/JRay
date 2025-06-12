@@ -68,4 +68,13 @@ public class Utility {
     public static Vec3 gammaCorrect(Vec3 color) {
         return new Vec3((float)Math.sqrt(color.x), (float)Math.sqrt(color.y), (float)Math.sqrt(color.z));
     }
+    public static boolean isNearZero(float f) {
+        return Math.abs(f) < 1e-8f;
+    }
+    public static boolean isNearZero(Vec3 v) {
+        return isNearZero(v.x) && isNearZero(v.y) && isNearZero(v.z);
+    }
+    public static Vec3 reflect(Vec3 v, Vec3 normal) {
+        return v.sub(normal.mul(2.0f * v.dot(normal)));
+    }
 }

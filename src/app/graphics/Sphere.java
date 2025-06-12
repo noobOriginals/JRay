@@ -6,10 +6,12 @@ import app.graphics.util.Vec3;
 public class Sphere implements Hittable {
     private Vec3 center;
     private float radius;
+    private Material material;
 
-    public Sphere(Vec3 center, float radius) {
+    public Sphere(Vec3 center, float radius, Material material) {
         this.center = center;
         this.radius = (radius > 0.0f) ? radius : 0.0f;
+        this.material = material;
     }
 
     @Override
@@ -36,10 +38,11 @@ public class Sphere implements Hittable {
             }
         }
 
-        hitPoint.t = root;
-        hitPoint.point = ray.at(hitPoint.t);
+        hitPoint.setT(root);
+        hitPoint.setPoint(ray.at(hitPoint.getT()));
         Vec3 normal = hitPoint.getPoint().sub(center).normalize();
         hitPoint.setFaceNormal(ray, normal);
+        hitPoint.setMaterial(material);
 
         return true;
     }
