@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Strarting render...");
         long startTime = System.nanoTime();
-        Render render = new Render(800, 450, 1.0f, 4.0f, 50, 2);
+        Render render = new Render(800, 450, 1.0f, 4.0f, 10, 10);
         World world = new World();
         world.add(new Sphere(new Vec3(0.0f, 0.0f, -1.0f), 0.5f));
         world.add(new Sphere(new Vec3(0, -100.5f, -1.0f), 100.0f));

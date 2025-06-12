@@ -50,11 +50,8 @@ public class Render {
         HitPoint hitPoint = new HitPoint();
         Vec3 color;
         if (world.raycast(ray, new Interval(0.001f, Float.POSITIVE_INFINITY), hitPoint)) {
-            Vec3 random = randomUnitVec3();
-            if (random.dot(hitPoint.getNormal()) < 0.0f) {
-                random = random.neg();
-            }
-            return raycast(new Ray(hitPoint.getPoint(), random), depth - 1, world).mul(0.5f);
+            Vec3 direction = randomUnitVec3().add(hitPoint.getNormal());
+            return raycast(new Ray(hitPoint.getPoint(), direction), depth - 1, world).mul(0.5f);
         }
         else {
             Vec3 dir = ray.getDir().normalize();
