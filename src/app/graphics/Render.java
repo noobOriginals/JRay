@@ -13,7 +13,7 @@ public class Render {
     private Image image;
     private int samplesPerPixel;
     private float pixelSamplesScale;
-    private int maxDepth; // Maximum recursion depth for ray tracing
+    private int maxDepth;
 
     public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth) {
         float aspectRatio = (float)width / height;
