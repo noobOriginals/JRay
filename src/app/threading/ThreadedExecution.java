@@ -4,13 +4,26 @@ public class ThreadedExecution implements Runnable {
     private MethodCallback callback;
     private Thread thread;
     private volatile boolean running;
+    private String name;
 
     public ThreadedExecution() {
         callback = null;
+        name = null;
+        running = false;
+    }
+    public ThreadedExecution(String name) {
+        callback = null;
+        this.name = name;
         running = false;
     }
     public ThreadedExecution(MethodCallback callback) {
         this.callback = callback;
+        name = null;
+        running = false;
+    }
+    public ThreadedExecution(MethodCallback callback, String name) {
+        this.callback = callback;
+        this.name = name;
         running = false;
     }
 
@@ -36,5 +49,8 @@ public class ThreadedExecution implements Runnable {
     }
     public MethodCallback getCallback() {
         return callback;
+    }
+    public String getName() {
+        return name;
     }
 }

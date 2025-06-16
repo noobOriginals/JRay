@@ -7,6 +7,9 @@ import app.graphics.util.Vec3;
 import app.threading.ThreadedExecution;
 
 import static app.graphics.util.VecMath.*;
+
+import java.util.ArrayList;
+
 import static app.graphics.util.Utility.*;
 
 public class Render {
@@ -19,7 +22,9 @@ public class Render {
     private ThreadedExecution progressIndicator;
     private volatile boolean done, doneFull;
     private volatile long startTime, elapsedTime;
-    private volatile int x, y, percent;
+    private volatile int percent, renderedPixels, runningExecs;
+
+    private ArrayList<ThreadedExecution> execs = new ArrayList<>();
 
     public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth) {
         float aspectRatio = (float)width / height;
@@ -37,18 +42,43 @@ public class Render {
         done = doneFull = false;
         startProgressIndication();
         startTime = System.nanoTime();
-        for (y = 0; y < image.getHeight(); y++) {
-            for (x = 0; x < image.getWidth(); x++) {
-                Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
-                for (int s = 0; s < samplesPerPixel; s++) {
-                    Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
-                    Vec3 pixelPos = camera.getPixelPos(x, y).add(offset.mul(new Vec3(camera.getPixelDeltaX().x, camera.getPixelDeltaY().y, 0.0f)));
-                    Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
-                    color = add(color, raycast(ray, maxDepth, world));
+        renderedPixels = 0;
+        for (int y = 0; y < image.getHeight(); y++) {
+            ThreadedExecution exec = new ThreadedExecution("TE" + y);
+            execs.add(exec);
+            final int line = y;
+            exec.execute(() -> {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
+                    for (int s = 0; s < samplesPerPixel; s++) {
+                        Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
+                        Vec3 pixelPos = camera.getPixelPos(x, line).add(offset.mul(new Vec3(camera.getPixelDeltaX().x, camera.getPixelDeltaY().y, 0.0f)));
+                        Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
+                        color = add(color, raycast(ray, maxDepth, world));
+                    }
+                    image.set(x, line, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
+                    elapsedTime = System.nanoTime() - startTime;
+                    renderedPixels++;
                 }
-                image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
-                percent = (int)((float)(y * image.getWidth() + x) / image.getSize() * 100.0f);
-                elapsedTime = System.nanoTime() - startTime;
+            });
+        }
+        while (true) {
+            boolean d = true;
+            int rExecs = 0;
+            for (ThreadedExecution e : execs) {
+                if (!e.isDone()) {
+                    d = false;
+                    rExecs++;
+                }
+            }
+            if (d) {
+                break;
+            }
+            runningExecs = rExecs;
+            try {
+                Thread.sleep((long)(1000 / 30));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e.getMessage(), e.getCause());
             }
         }
         done = true;
@@ -61,7 +91,8 @@ public class Render {
         progressIndicator.execute(() -> {
             System.out.println("Starting render...");
             while (!done) {
-                System.out.print("Rendering scanline: " + y + ", pixel: " + (y * image.getWidth() + x) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
+                percent = (int)((float)(renderedPixels) / image.getSize() * 100.0f);
+                System.out.print("Running threads: " + runningExecs + "/" + image.getHeight() + ", Rendering pixel: " + (renderedPixels + 1) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
                 try {
                     Thread.sleep((long)(1000 / 30));
                 } catch (InterruptedException e) {
