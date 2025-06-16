@@ -92,7 +92,7 @@ public class Render {
             System.out.println("Starting render...");
             while (!done) {
                 percent = (int)((float)(renderedPixels) / image.getSize() * 100.0f);
-                System.out.print("Running threads: " + runningExecs + "/" + image.getHeight() + ", Rendering pixel: " + (renderedPixels + 1) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
+                System.out.print("Running threads: " + runningExecs + "/" + image.getHeight() + ", Rendered pixels: " + (renderedPixels + 1) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
                 try {
                     Thread.sleep((long)(1000 / 30));
                 } catch (InterruptedException e) {
