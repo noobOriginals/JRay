@@ -4,6 +4,7 @@ import app.graphics.util.Image;
 import app.graphics.util.Interval;
 import app.graphics.util.Pixel;
 import app.graphics.util.Vec3;
+import app.threading.ThreadedExecution;
 
 import static app.graphics.util.VecMath.*;
 import static app.graphics.util.Utility.*;
@@ -15,6 +16,11 @@ public class Render {
     private float pixelSamplesScale;
     private int maxDepth;
 
+    private ThreadedExecution progressIndicator;
+    private volatile boolean done, doneFull;
+    private volatile long startTime, elapsedTime;
+    private volatile int x, y, percent;
+
     public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth) {
         float aspectRatio = (float)width / height;
         camera = new Camera(new Vec3(0.0f, 0.0f, 0.0f), aspectRatio, focalLength, viewPortWidth, width);
@@ -22,13 +28,17 @@ public class Render {
         this.samplesPerPixel = samplesPerPixel;
         this.maxDepth = maxDepth;
         pixelSamplesScale = 1.0f / samplesPerPixel;
+
+        progressIndicator = new ThreadedExecution();
+        done = doneFull = false;
     }
 
     public void render(World world) {
-        System.out.println("Starting render...");
-        long startTime = System.nanoTime();
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
+        done = doneFull = false;
+        startProgressIndication();
+        startTime = System.nanoTime();
+        for (y = 0; y < image.getHeight(); y++) {
+            for (x = 0; x < image.getWidth(); x++) {
                 Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
                 for (int s = 0; s < samplesPerPixel; s++) {
                     Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
@@ -37,12 +47,30 @@ public class Render {
                     color = add(color, raycast(ray, maxDepth, world));
                 }
                 image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
-                int p = (int)((float)(y * image.getWidth() + x) / image.getSize() * 100.0f);
-                long elapsedTime = System.nanoTime() - startTime;
-                System.out.print("Rendering scanline: " + y + ", pixel: " + (y * image.getWidth() + x) + ", progress: " + p + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
+                percent = (int)((float)(y * image.getWidth() + x) / image.getSize() * 100.0f);
+                elapsedTime = System.nanoTime() - startTime;
             }
         }
-        System.out.println("Rendered " + image.getSize() + " pixels in: " + (System.nanoTime() - startTime) / 1000000000.0f + " seconds.                                                                                       ");
+        done = true;
+    }
+
+    public void startProgressIndication() {
+        if (done) {
+            return;
+        }
+        progressIndicator.execute(() -> {
+            System.out.println("Starting render...");
+            while (!done) {
+                System.out.print("Rendering scanline: " + y + ", pixel: " + (y * image.getWidth() + x) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
+                try {
+                    Thread.sleep((long)(1000 / 30));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e.getMessage(), e.getCause());
+                }
+            }
+            System.out.println("Rendered " + image.getSize() + " pixels in: " + (System.nanoTime() - startTime) / 1000000000.0f + " seconds.                                                 ");
+            doneFull = true;
+        });
     }
 
     public void save(String filename) {
@@ -83,5 +111,8 @@ public class Render {
     }
     public int getHeight() {
         return image.getHeight();
+    }
+    public boolean isDone() {
+        return doneFull;
     }
 }
