@@ -1,4 +1,4 @@
-#! /bin/bash/
+#! /usr/bin/bash
 
 if [ -d ./build ]; then rm -rf ./build; fi
 if [ -f ./sources.txt ]; then rm -rf ./sources.txt; fi
