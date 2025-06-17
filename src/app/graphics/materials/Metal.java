@@ -8,8 +8,8 @@ import app.graphics.Ray;
 import static app.graphics.util.Utility.*;
 
 public class Metal implements Material {
-    private Vec3 albedo;
-    private float fuzz;
+    private final Vec3 albedo;
+    private final float fuzz;
 
     public Metal(Vec3 albedo, float fuzz) {
         this.albedo = albedo;

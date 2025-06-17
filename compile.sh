@@ -10,5 +10,5 @@ cd ./build
 find . -name "*.class" -print > ../binaries.txt
 echo "Manifest-Version: 1.0" > Manifest.txt
 echo "Main-Class: $1" >> Manifest.txt
-jar -cfmv ../App.jar Manifest.txt @../binaries.txt
+jar -cfm ../App.jar Manifest.txt @../binaries.txt
 cd ./..

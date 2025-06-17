@@ -13,14 +13,13 @@ import java.util.ArrayList;
 import static app.graphics.util.Utility.*;
 
 public class Render {
-    private Camera camera;
-    private Image image;
+    private final Camera camera;
+    private final Image image;
     private int samplesPerPixel;
     private float pixelSamplesScale;
     private int maxDepth;
     private int nrThreads;
 
-    private ThreadedExecution progressIndicator;
     private volatile boolean done, doneFull;
     private volatile long startTime, elapsedTime;
     private volatile int percent, renderedPixels, runningExecs;
@@ -33,25 +32,20 @@ public class Render {
         image = new Image(width, height);
         this.samplesPerPixel = samplesPerPixel;
         this.maxDepth = maxDepth;
-        pixelSamplesScale = 1.0f / samplesPerPixel;
         this.nrThreads = nrThreads;
 
-        progressIndicator = new ThreadedExecution();
+        pixelSamplesScale = 1.0f / samplesPerPixel;
         done = doneFull = false;
     }
 
     public void render(World world) {
+        execs.clear();
         done = doneFull = false;
         startProgressIndication();
         startTime = System.nanoTime();
         renderedPixels = 0;
-        int linesPerThread = (int)(image.getHeight() / nrThreads);
-        int restLines = image.getHeight() % nrThreads;
         for (int i = 0; i < nrThreads; i++) {
-            dispatch(i * linesPerThread, (i + 1) * linesPerThread, world);
-        }
-        if (restLines != 0) {
-            dispatch(nrThreads * linesPerThread, image.getHeight(), world);
+            dispatch(i, nrThreads, world);
         }
         while (true) {
             boolean d = true;
@@ -80,7 +74,7 @@ public class Render {
         if (done) {
             return;
         }
-        progressIndicator.execute(() -> {
+        new ThreadedExecution().execute(() -> {
             System.out.println("Starting render...");
             while (!done) {
                 percent = (int)((float)(renderedPixels) / image.getSize() * 100.0f);
@@ -139,11 +133,11 @@ public class Render {
         return doneFull;
     }
 
-    private void dispatch(final int starty, final int endy, final World world) {
+    private void dispatch(final int idxOffset, final int stride, final World world) {
         ThreadedExecution exec = new ThreadedExecution();
         execs.add(exec);
         exec.execute(() -> {
-            for (int y = starty; y < endy; y++) {
+            for (int y = idxOffset; y < image.getHeight(); y += stride) {
                 for (int x = 0; x < image.getWidth(); x++) {
                     Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
                     for (int s = 0; s < samplesPerPixel; s++) {
