@@ -18,6 +18,7 @@ public class Render {
     private int samplesPerPixel;
     private float pixelSamplesScale;
     private int maxDepth;
+    private int nrThreads;
 
     private ThreadedExecution progressIndicator;
     private volatile boolean done, doneFull;
@@ -26,13 +27,14 @@ public class Render {
 
     private ArrayList<ThreadedExecution> execs = new ArrayList<>();
 
-    public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth) {
+    public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth, int nrThreads) {
         float aspectRatio = (float)width / height;
         camera = new Camera(new Vec3(0.0f, 0.0f, 0.0f), aspectRatio, focalLength, viewPortWidth, width);
         image = new Image(width, height);
         this.samplesPerPixel = samplesPerPixel;
         this.maxDepth = maxDepth;
         pixelSamplesScale = 1.0f / samplesPerPixel;
+        this.nrThreads = nrThreads;
 
         progressIndicator = new ThreadedExecution();
         done = doneFull = false;
@@ -43,24 +45,13 @@ public class Render {
         startProgressIndication();
         startTime = System.nanoTime();
         renderedPixels = 0;
-        for (int y = 0; y < image.getHeight(); y++) {
-            ThreadedExecution exec = new ThreadedExecution("TE" + y);
-            execs.add(exec);
-            final int line = y;
-            exec.execute(() -> {
-                for (int x = 0; x < image.getWidth(); x++) {
-                    Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
-                    for (int s = 0; s < samplesPerPixel; s++) {
-                        Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
-                        Vec3 pixelPos = camera.getPixelPos(x, line).add(offset.mul(new Vec3(camera.getPixelDeltaX().x, camera.getPixelDeltaY().y, 0.0f)));
-                        Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
-                        color = add(color, raycast(ray, maxDepth, world));
-                    }
-                    image.set(x, line, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
-                    elapsedTime = System.nanoTime() - startTime;
-                    renderedPixels++;
-                }
-            });
+        int linesPerThread = (int)(image.getHeight() / nrThreads);
+        int restLines = image.getHeight() % nrThreads;
+        for (int i = 0; i < nrThreads; i++) {
+            dispatch(i * linesPerThread, (i + 1) * linesPerThread, world);
+        }
+        if (restLines != 0) {
+            dispatch(nrThreads * linesPerThread, image.getHeight(), world);
         }
         while (true) {
             boolean d = true;
@@ -75,6 +66,7 @@ public class Render {
                 break;
             }
             runningExecs = rExecs;
+            elapsedTime = System.nanoTime() - startTime;
             try {
                 Thread.sleep((long)(1000 / 30));
             } catch (InterruptedException e) {
@@ -92,7 +84,7 @@ public class Render {
             System.out.println("Starting render...");
             while (!done) {
                 percent = (int)((float)(renderedPixels) / image.getSize() * 100.0f);
-                System.out.print("Running threads: " + runningExecs + "/" + image.getHeight() + ", Rendered pixels: " + (renderedPixels + 1) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
+                System.out.print("Running threads: " + runningExecs + "/" + nrThreads + ", Rendered pixels: " + (renderedPixels + 1) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
                 try {
                     Thread.sleep((long)(1000 / 30));
                 } catch (InterruptedException e) {
@@ -145,5 +137,25 @@ public class Render {
     }
     public boolean isDone() {
         return doneFull;
+    }
+
+    private void dispatch(final int starty, final int endy, final World world) {
+        ThreadedExecution exec = new ThreadedExecution();
+        execs.add(exec);
+        exec.execute(() -> {
+            for (int y = starty; y < endy; y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    Vec3 color = new Vec3(0.0f, 0.0f, 0.0f);
+                    for (int s = 0; s < samplesPerPixel; s++) {
+                        Vec3 offset = new Vec3(randomFloat(-0.5f, 0.5f), randomFloat(-0.5f, 0.5f), 0.0f);
+                        Vec3 pixelPos = camera.getPixelPos(x, y).add(offset.mul(new Vec3(camera.getPixelDeltaX().x, camera.getPixelDeltaY().y, 0.0f)));
+                        Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
+                        color = add(color, raycast(ray, maxDepth, world));
+                    }
+                    image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
+                    renderedPixels++;
+                }
+            }
+        });
     }
 }

@@ -35,11 +35,11 @@ public class ThreadedExecution implements Runnable {
         if (callback == null) {
             throw new RuntimeException("Method callback was null!");
         }
+        running = true;
         thread = new Thread(this);
         thread.start();
     }
     public void run() {
-        running = true;
         callback.run();
         running = false;
     }
