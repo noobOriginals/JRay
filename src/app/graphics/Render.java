@@ -9,6 +9,7 @@ import app.threading.ThreadedExecution;
 import static app.graphics.util.VecMath.*;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static app.graphics.util.Utility.*;
 
@@ -22,7 +23,9 @@ public class Render {
 
     private volatile boolean done, doneFull;
     private volatile long startTime, elapsedTime;
-    private volatile int percent, renderedPixels, runningExecs;
+    private volatile int percent, runningExecs;
+
+    private AtomicInteger renderedPixels = new AtomicInteger();
 
     private ArrayList<ThreadedExecution> execs = new ArrayList<>();
 
@@ -43,7 +46,7 @@ public class Render {
         done = doneFull = false;
         startProgressIndication();
         startTime = System.nanoTime();
-        renderedPixels = 0;
+        renderedPixels.set(0);
         for (int i = 0; i < nrThreads; i++) {
             dispatch(i, nrThreads, world);
         }
@@ -77,8 +80,8 @@ public class Render {
         new ThreadedExecution().execute(() -> {
             System.out.println("Starting render...");
             while (!done) {
-                percent = (int)((float)(renderedPixels) / image.getSize() * 100.0f);
-                System.out.print("Running threads: " + runningExecs + "/" + nrThreads + ", Rendered pixels: " + (renderedPixels + 1) + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
+                percent = (int)((float)(renderedPixels.get()) / image.getSize() * 100.0f);
+                System.out.print("Running threads: " + runningExecs + "/" + nrThreads + ", Rendered pixels: " + renderedPixels.get() + ", progress: " + percent + "%, time: " + elapsedTime / 1000000000.0f + "s           \r");
                 try {
                     Thread.sleep((long)(1000 / 30));
                 } catch (InterruptedException e) {
@@ -147,7 +150,7 @@ public class Render {
                         color = add(color, raycast(ray, maxDepth, world));
                     }
                     image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
-                    renderedPixels++;
+                    renderedPixels.incrementAndGet();
                 }
             }
         });
