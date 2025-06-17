@@ -8,5 +8,5 @@ Set-Location .\build
 ("./" + (Get-ChildItem -Filter "*.class" -Recurse -File -Name)).Replace("\", "/") | Out-File ..\binaries.txt -Encoding ascii
 "Manifest-Version: 1.0
 Main-Class: $($args[0])" | Out-File Manifest.txt -Encoding ascii
-jar --% -cfmv ..\App.jar Manifest.txt @..\binaries.txt
+jar --% -cfm ..\App.jar Manifest.txt @..\binaries.txt
 Set-Location .\..

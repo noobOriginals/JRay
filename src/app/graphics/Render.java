@@ -24,9 +24,7 @@ public class Render {
     private volatile boolean done, doneFull;
     private volatile long startTime, elapsedTime;
     private volatile int percent, runningExecs;
-
     private AtomicInteger renderedPixels = new AtomicInteger();
-
     private ArrayList<ThreadedExecution> execs = new ArrayList<>();
 
     public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth, int nrThreads) {
