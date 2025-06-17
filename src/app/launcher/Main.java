@@ -13,7 +13,7 @@ public class Main {
     static Material diffuse = new Lambertian(new Vec3(0.1f, 0.2f, 0.5f));
     static Material shinyMetal = new Metal(new Vec3(0.8f, 0.8f, 0.0f), 0.05f);
     public static void main(String[] args) {
-        Render render = new Render(800, 450, 1.0f, 4.0f, 500, 100, 128);
+        Render render = new Render(800, 450, 1.0f, 4.0f, 500, 100, 64);
         // Render render = new Render(1920, 1080, 1.0f, 4.0f, 200, 100, 128);
         // Render render = new Render(3840, 2160, 1.0f, 4.0f, 500, 100, 128);
         World world = new World();
