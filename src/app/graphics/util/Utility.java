@@ -78,4 +78,10 @@ public class Utility {
     public static Vec3 reflect(Vec3 v, Vec3 normal) {
         return v.sub(normal.mul(2.0f * v.dot(normal)));
     }
+    public static Vec3 refract(Vec3 uv, Vec3 normal, float ratio) {
+        float cos = Math.min(uv.neg().dot(normal), 1.0f);
+        Vec3 perp = normal.mul(cos).add(uv).mul(ratio);
+        Vec3 parl = normal.mul(-(float)Math.sqrt(Math.abs(1.0f - perp.lenSq())));
+        return perp.add(parl);
+    }
 }

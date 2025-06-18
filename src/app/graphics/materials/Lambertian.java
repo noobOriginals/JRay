@@ -8,7 +8,7 @@ import app.graphics.Ray;
 import static app.graphics.util.Utility.*;
 
 public class Lambertian implements Material {
-    private Vec3 albedo;
+    private final Vec3 albedo;
 
     public Lambertian(Vec3 albedo) {
         this.albedo = albedo;

@@ -1,0 +1,46 @@
+package app.graphics.materials;
+
+import static app.graphics.util.Utility.reflect;
+import static app.graphics.util.Utility.refract;
+
+import app.graphics.HitPoint;
+import app.graphics.Material;
+import app.graphics.Ray;
+import app.graphics.util.Vec3;
+
+public class Dielectric implements Material {
+    private final float refractionIdx;
+
+    public Dielectric(float refractionIdx) {
+        this.refractionIdx = refractionIdx;
+    }
+
+    @Override
+    public boolean scatter(Ray rayIn, HitPoint hitPoint, Vec3 attenuation, Ray scatteredRay) {
+        attenuation.copy(new Vec3(1.0f));
+        float ratio = hitPoint.getFrontFace() ? (1.0f / refractionIdx) : refractionIdx;
+
+        Vec3 direction = rayIn.getDir().normalize();
+
+        float cos = Math.min(direction.neg().dot(hitPoint.getNormal()), 1.0f);
+        float sin = (float)Math.sqrt(1.0f - cos * cos);
+
+        boolean canRefract = ratio * sin <= 1.0f;
+
+        if (canRefract) {
+            direction = refract(direction, hitPoint.getNormal(), ratio);
+        }
+        else {
+            direction = reflect(direction, hitPoint.getNormal());
+        }
+
+        scatteredRay.setOrigin(hitPoint.getPoint());
+        scatteredRay.setDir(direction);
+        return true;
+    }
+
+    public float getRefractionIdx() {
+        return refractionIdx;
+    }
+
+}
