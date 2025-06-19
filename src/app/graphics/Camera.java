@@ -35,7 +35,7 @@ public class Camera {
         Vec3 viewPortY = v.mul(viewportHeight);
         pixelDeltaX = viewPortX.div(imageWidth);
         pixelDeltaY = viewPortY.div(imageHeight);
-        Vec3 viewPortOrigin = pos.sub(new Vec3(0.0f, 0.0f, focalLength)).sub(viewPortX.div(2.0f)).sub(viewPortY.div(2.0f));
+        Vec3 viewPortOrigin = pos.sub(w).sub(viewPortX.div(2.0f)).sub(viewPortY.div(2.0f));
         pixelOrigin = viewPortOrigin.add(add(pixelDeltaX, pixelDeltaY).mul(0.5f));
     }
 
