@@ -84,4 +84,9 @@ public class Utility {
         Vec3 parl = normal.mul(-(float)Math.sqrt(Math.abs(1.0f - perp.lenSq())));
         return perp.add(parl);
     }
+    public static float reflectance(float cosine, float refIdx) {
+        float r0 = (1.0f - refIdx) / (1.0f + refIdx);
+        r0 = r0 * r0;
+        return r0 + (1.0f - r0) * (float)Math.pow(1.0f - cosine, 5.0f);
+    }
 }

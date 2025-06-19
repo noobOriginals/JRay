@@ -1,6 +1,8 @@
 package app.graphics.materials;
 
+import static app.graphics.util.Utility.randomFloat;
 import static app.graphics.util.Utility.reflect;
+import static app.graphics.util.Utility.reflectance;
 import static app.graphics.util.Utility.refract;
 
 import app.graphics.HitPoint;
@@ -25,13 +27,13 @@ public class Dielectric implements Material {
         float cos = Math.min(direction.neg().dot(hitPoint.getNormal()), 1.0f);
         float sin = (float)Math.sqrt(1.0f - cos * cos);
 
-        boolean canRefract = ratio * sin <= 1.0f;
+        boolean cannotRefract = ratio * sin > 1.0f;
 
-        if (canRefract) {
-            direction = refract(direction, hitPoint.getNormal(), ratio);
+        if (cannotRefract || reflectance(cos, ratio) > randomFloat()) {
+            direction = reflect(direction, hitPoint.getNormal());
         }
         else {
-            direction = reflect(direction, hitPoint.getNormal());
+            direction = refract(direction, hitPoint.getNormal(), ratio);
         }
 
         scatteredRay.setOrigin(hitPoint.getPoint());
