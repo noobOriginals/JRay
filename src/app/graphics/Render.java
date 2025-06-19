@@ -27,9 +27,9 @@ public class Render {
     private AtomicInteger renderedPixels = new AtomicInteger();
     private ArrayList<ThreadedExecution> execs = new ArrayList<>();
 
-    public Render(int width, int height, float focalLength, float viewPortWidth, int samplesPerPixel, int maxDepth, int nrThreads) {
+    public Render(Vec3 pos, Vec3 lookat, int width, int height, float hfov, int samplesPerPixel, int maxDepth, int nrThreads) {
         float aspectRatio = (float)width / height;
-        camera = new Camera(new Vec3(0.0f, 0.0f, 0.0f), aspectRatio, focalLength, viewPortWidth, width);
+        camera = new Camera(pos, lookat, aspectRatio, hfov, width);
         image = new Image(width, height);
         this.samplesPerPixel = samplesPerPixel;
         this.maxDepth = maxDepth;

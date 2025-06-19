@@ -10,15 +10,12 @@ import app.graphics.Material;
 import app.graphics.util.Vec3;
 
 public class Main {
-    static Material fuzzedMetal = new Metal(new Vec3(0.8f, 0.6f, 0.2f), 0.2f);
-    static Material diffuse = new Lambertian(new Vec3(0.1f, 0.2f, 0.5f));
-    static Material shinyMetal = new Metal(new Vec3(0.8f, 0.8f, 0.0f), 0.05f);
     public static void main(String[] args) {
-        Render render = new Render(800, 450, 1.0f, 4.0f, 500, 100, 64);
+        Render render = new Render(new Vec3(-2.0f, 2.0f, 1.0f), new Vec3(0.0f, 0.0f, -1.0f), 800, 450, 110.0f, 500, 100, 64);
         // Render render = new Render(1920, 1080, 1.0f, 4.0f, 200, 100, 128);
         // Render render = new Render(3840, 2160, 1.0f, 4.0f, 500, 100, 128);
         World world = new World();
-        world.add(new Sphere(new Vec3(0, -100.5f, -1.0f), 100.0f, diffuse(0.1f, 0.5f, 0.1f)));
+        world.add(new Sphere(new Vec3(0.0f, -100.5f, -1.0f), 100.0f, diffuse(0.8f, 0.8f, 0.0f)));
         world.add(new Sphere(new Vec3(-1.0f, 0.0f, -1.0f), 0.5f, diffuse(0.1f, 0.2f, 0.5f)));
         world.add(new Sphere(new Vec3(-1.2f, 0.0f, -1.8f), 0.45f, diffuse(0.1f, 0.2f, 0.5f)));
         world.add(new Sphere(new Vec3(0.0f, 0.0f, -1.3f), 0.4f, dielectric(1.0f / 1.5f)));
