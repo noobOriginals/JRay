@@ -24,8 +24,8 @@ public class Image {
     public void set(int idx, Pixel p) {
         pixels[idx] = p;
     }
-    public void setPixels(int size, Pixel[] pixels) {
-        for (int i = 0; i < size; i++) {
+    public void setPixels(int size, int offset, Pixel[] pixels) {
+        for (int i = offset; i < size; i++) {
             this.pixels[i] = pixels[i];
         }
     }
