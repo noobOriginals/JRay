@@ -11,15 +11,17 @@ import app.graphics.Ray;
 import app.graphics.util.Vec3;
 
 public class Dielectric implements Material {
+    private final Vec3 albedo;
     private final float refractionIdx;
 
-    public Dielectric(float refractionIdx) {
+    public Dielectric(Vec3 albedo, float refractionIdx) {
+        this.albedo = albedo;
         this.refractionIdx = refractionIdx;
     }
 
     @Override
     public boolean scatter(Ray rayIn, HitPoint hitPoint, Vec3 attenuation, Ray scatteredRay) {
-        attenuation.copy(new Vec3(1.0f));
+        attenuation.copy(albedo);
         float ratio = hitPoint.getFrontFace() ? (1.0f / refractionIdx) : refractionIdx;
 
         Vec3 direction = rayIn.getDir().normalize();

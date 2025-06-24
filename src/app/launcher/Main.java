@@ -17,8 +17,8 @@ public class Main {
         World world = new World();
         world.add(new Sphere(new Vec3(0.0f, -100.5f, -1.0f), 100.0f, diffuse(0.8f, 0.8f, 0.0f)));
         world.add(new Sphere(new Vec3(0.0f, 0.0f, -1.2f), 0.5f, diffuse(0.1f, 0.2f, 0.5f)));
-        world.add(new Sphere(new Vec3(-1.0f, 0.0f, -1.0f), 0.4f, dielectric(1.0f / 1.5f)));
-        world.add(new Sphere(new Vec3(-1.0f, 0.0f, -1.0f), 0.5f, dielectric(1.5f)));
+        // world.add(new Sphere(new Vec3(-1.0f, 0.0f, -1.0f), 0.4f, dielectric(0.9f, 0.9f, 0.9f, 1.0f / 1.5f)));
+        world.add(new Sphere(new Vec3(-1.0f, 0.0f, -1.0f), 0.5f, dielectric(0.9f, 0.9f, 0.9f, 1.5f)));
         world.add(new Sphere(new Vec3(1.0f, 0.0f, -1.0f), 0.5f, metal(0.8f, 0.4f, 0.4f, 0.08f)));
         render.render(world);
         while (!render.isDone()) {}
@@ -36,7 +36,7 @@ public class Main {
     public static Material metal(float r, float g, float b, float fuzz) {
         return new Metal(new Vec3(r, g, b), fuzz);
     }
-    public static Material dielectric(float refractIdx) {
-        return new Dielectric(refractIdx);
+    public static Material dielectric(float r, float g, float b, float refractIdx) {
+        return new Dielectric(new Vec3(r, g, b), refractIdx);
     }
 }

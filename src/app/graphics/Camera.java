@@ -15,9 +15,9 @@ public class Camera {
     private Vec3 pixelOrigin;
     private Vec3 pos, lookat, up;
     private Vec3 u, v, w;
-    private int imageWidth, imageHeight;
+    private int pixelsX, pixelsY;
 
-    public Camera(Vec3 pos, Vec3 lookat, float aspectRatio, float hfov, int imageWidth) {
+    public Camera(Vec3 pos, Vec3 lookat, float aspectRatio, float hfov, int pixelsX) {
         this.pos = pos;
         this.lookat = lookat;
         this.up = new Vec3(0.0f, 1.0f, 0.0f);
@@ -25,16 +25,16 @@ public class Camera {
         float width = (float)Math.tan(degreesToRadians(hfov) / 2.0f);
         this.viewportWidth = width * 2.0f;
         focalLength = 1.0f;
-        this.imageWidth = imageWidth;
-        this.imageHeight = (int)(imageWidth / aspectRatio);
-        viewportHeight = viewportWidth * (float)imageHeight / imageWidth;
+        this.pixelsX = pixelsX;
+        this.pixelsY = (int)(pixelsX / aspectRatio);
+        viewportHeight = viewportWidth * (float)pixelsY / pixelsX;
         w = pos.sub(lookat).normalize();
         u = up.cross(w).normalize();
         v = w.cross(u);
         Vec3 viewPortX = u.mul(viewportWidth);
         Vec3 viewPortY = v.mul(viewportHeight);
-        pixelDeltaX = viewPortX.div(imageWidth);
-        pixelDeltaY = viewPortY.div(imageHeight);
+        pixelDeltaX = viewPortX.div(pixelsX);
+        pixelDeltaY = viewPortY.div(pixelsY);
         Vec3 viewPortOrigin = pos.sub(w).sub(viewPortX.div(2.0f)).sub(viewPortY.div(2.0f));
         pixelOrigin = viewPortOrigin.add(add(pixelDeltaX, pixelDeltaY).mul(0.5f));
     }
@@ -81,16 +81,17 @@ public class Camera {
     public Vec3 getUp() {
         return up;
     }
-    public void setPos(Vec3 pos) {
+    public void setPos(Vec3 pos, Vec3 lookat) {
         this.pos = pos;
+        this.lookat = lookat;
         w = pos.sub(lookat).normalize();
         u = up.cross(w).normalize();
         v = w.cross(u);
         Vec3 viewPortX = u.mul(viewportWidth);
         Vec3 viewPortY = v.mul(viewportHeight);
-        pixelDeltaX = viewPortX.div(imageWidth);
-        pixelDeltaY = viewPortY.div(imageHeight);
-        Vec3 viewPortOrigin = pos.sub(new Vec3(0.0f, 0.0f, focalLength)).sub(viewPortX.div(2.0f)).sub(viewPortY.div(2.0f));
+        pixelDeltaX = viewPortX.div(pixelsX);
+        pixelDeltaY = viewPortY.div(pixelsY);
+        Vec3 viewPortOrigin = pos.sub(w).sub(viewPortX.div(2.0f)).sub(viewPortY.div(2.0f));
         pixelOrigin = viewPortOrigin.add(add(pixelDeltaX, pixelDeltaY).mul(0.5f));
     }
 }
