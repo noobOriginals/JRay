@@ -3,3 +3,5 @@ binaries.txt
 sources.txt
 Manifest.txt
 App.jar
+build.sh
+run.sh
