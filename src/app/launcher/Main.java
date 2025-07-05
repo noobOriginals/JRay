@@ -11,7 +11,7 @@ import app.graphics.util.Vec3;
 
 public class Main {
     public static void main(String[] args) {
-        Render render = new Render(new Vec3(-2.0f, 2.0f, 1.0f), new Vec3(0.0f, 0.0f, -1.0f), 2000, 1500, 70.0f, 500, 100, 32);
+        Render render = new Render(new Vec3(-2.0f, 2.0f, 1.0f), new Vec3(0.0f, 0.0f, -1.0f), 2000, 1200, 70.0f, 500, 100, 32);
         World world = new World();
         world.add(new Sphere(new Vec3(0.0f, -100.5f, -1.0f), 100.0f, diffuse(0.8f, 0.8f, 0.0f)));
         world.add(new Sphere(new Vec3(0.0f, 0.0f, -1.2f), 0.5f, diffuse(0.1f, 0.2f, 0.5f)));
