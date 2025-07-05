@@ -17,7 +17,7 @@ public class Render {
     private final Camera camera;
     private final Image image;
     private int samplesPerPixel;
-    private float pixelSamplesScale;
+    private float pixelSampleScale;
     private int maxDepth;
     private int nrThreads;
 
@@ -35,7 +35,7 @@ public class Render {
         this.maxDepth = maxDepth;
         this.nrThreads = nrThreads;
 
-        pixelSamplesScale = 1.0f / samplesPerPixel;
+        pixelSampleScale = 1.0f / samplesPerPixel;
         done = doneFull = false;
     }
 
@@ -133,6 +133,15 @@ public class Render {
     public boolean isDone() {
         return doneFull;
     }
+    public void waitToFinish() {
+        while (!isDone()) {
+            try {
+                Thread.sleep((long)(1000 / 30));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e.getMessage(), e.getCause());
+            }
+        }
+    }
 
     private void dispatch(final int idxOffset, final int stride, final World world) {
         ThreadedExecution exec = new ThreadedExecution();
@@ -147,7 +156,7 @@ public class Render {
                         Ray ray = new Ray(camera.getPos(), pixelPos.sub(camera.getPos()).normalize());
                         color = add(color, raycast(ray, maxDepth, world));
                     }
-                    image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSamplesScale), 0.0f, 1.0f))));
+                    image.set(x, y, new Pixel(gammaCorrect(clamp(color.mul(pixelSampleScale), 0.0f, 1.0f))));
                     renderedPixels.incrementAndGet();
                 }
             }
